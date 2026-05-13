@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jac's Sharpening Customer Details &amp; T&amp;Cs Acceptance</title>
+  <style>
+    :root { --bg:#f4f1ec; --card:#fff; --text:#242424; --muted:#666; --border:#d7d1c8; --accent:#7a1f1f; --accent-dark:#5f1717; --error:#b00020; --success:#1f6b3a; --shadow:0 18px 45px rgba(0,0,0,.10); --radius:18px; }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; font-family:Aptos,Calibri,Arial,sans-serif; background:radial-gradient(circle at top left, rgba(122,31,31,.10), transparent 32%), linear-gradient(135deg,#f7f4ef 0%,#ede6dc 100%); color:var(--text); display:flex; align-items:center; justify-content:center; padding:28px; }
+    .page-shell { width:100%; max-width:920px; }
+    .header { margin-bottom:20px; text-align:center; }
+    .header h1 { margin:0 0 8px; font-size:clamp(1.8rem,4vw,2.6rem); line-height:1.1; color:var(--accent); }
+    .header p { margin:0; color:var(--muted); font-size:1rem; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .card-banner { background:var(--accent); color:#fff; padding:18px 24px; }
+    .card-banner h2 { margin:0 0 5px; font-size:1.2rem; }
+    .card-banner p { margin:0; font-size:.95rem; opacity:.9; }
+    form { padding:24px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .field { display:flex; flex-direction:column; gap:7px; }
+    .field.full-width { grid-column:1 / -1; }
+    label { font-weight:700; font-size:.95rem; }
+    .required { color:var(--error); margin-left:3px; }
+    input { width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 13px; font:inherit; background:#fffdf9; color:var(--text); transition:border-color .2s ease, box-shadow .2s ease; }
+    input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 4px rgba(122,31,31,.12); }
+    .hint { color:var(--muted); font-size:.84rem; }
+    .terms-box { margin-top:20px; padding:16px; border:1px solid var(--border); border-radius:14px; background:#fbf8f2; }
+    .terms-text-box { width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 13px; background:#fffdf9; color:var(--text); line-height:1.45; font-size:.95rem; }
+    .terms-link { color:var(--accent); font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+    .acceptance-row { display:flex; flex-direction:column; gap:12px; align-items:stretch; margin-top:12px; }
+    .checkbox-row { display:flex; gap:12px; align-items:flex-start; }
+    .checkbox-row input { width:20px; height:20px; margin-top:1px; accent-color:var(--accent); flex:0 0 auto; }
+    .checkbox-row label { font-weight:600; line-height:1.4; }
+    .acceptance-confirm-box { border:1px solid var(--border); border-radius:14px; background:#fff; padding:12px; }
+    .acceptance-confirm-box label { display:block; margin-bottom:7px; font-size:.86rem; color:var(--muted); }
+    .acceptance-controls { display:flex; gap:10px; align-items:center; }
+    .acceptance-controls input { flex:1 1 auto; background:#f7f4ef; }
+    .accept-btn { flex:0 0 auto; background:var(--accent); color:#fff; padding:11px 16px; border-radius:12px; }
+    .accept-btn:hover { background:var(--accent-dark); }
+    .actions { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-top:24px; border-top:1px solid var(--border); padding-top:20px; }
+    button { border:none; border-radius:999px; padding:12px 22px; font:inherit; font-weight:700; cursor:pointer; transition:transform .15s ease, background .2s ease; }
+    button:hover { transform:translateY(-1px); }
+    .reset-btn { background:#ece6dd; color:var(--text); }
+    .email-links { display:none; width:100%; margin-top:18px; padding:16px; border:1px solid var(--border); border-radius:14px; background:#fbf8f2; }
+    .email-links.visible { display:block; }
+    .email-links h3 { margin:0 0 10px; color:var(--accent); }
+    .email-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .email-button, .copy-button { display:inline-block; border:none; border-radius:999px; padding:12px 18px; font:inherit; font-weight:700; text-decoration:none; cursor:pointer; }
+    .email-button { background:var(--accent); color:#fff; }
+    .copy-button { background:#ece6dd; color:var(--text); }
+    .email-note { margin:10px 0 0; color:var(--muted); font-size:.9rem; line-height:1.4; }
+    .message { display:none; margin-top:18px; border-radius:14px; padding:14px 16px; font-weight:600; }
+    .message.success { display:block; color:var(--success); background:rgba(31,107,58,.10); border:1px solid rgba(31,107,58,.22); }
+    .message.error { display:block; color:var(--error); background:rgba(176,0,32,.08); border:1px solid rgba(176,0,32,.22); }
+    .backend-status { margin-top:12px; display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; font-size:.86rem; font-weight:700; border:1px solid var(--border); background:#f7f4ef; color:var(--muted); }
+    .backend-status.ok { color:var(--success); border-color:rgba(31,107,58,.28); background:rgba(31,107,58,.08); }
+    .backend-status.down { color:var(--error); border-color:rgba(176,0,32,.28); background:rgba(176,0,32,.08); }
+    .output { display:none; margin-top:16px; border-radius:14px; padding:14px 16px; background:#f7f4ef; border:1px dashed var(--border); white-space:pre-wrap; font-size:.92rem; color:#333; }
+    .output.visible { display:block; }
+    .modal-backdrop { display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.58); padding:22px; overflow-y:auto; }
+    .modal-backdrop.visible { display:flex; align-items:flex-start; justify-content:center; }
+    .modal-panel { width:min(920px,100%); margin:24px auto; background:#fff; color:var(--text); border-radius:18px; box-shadow:0 24px 70px rgba(0,0,0,.28); border:1px solid var(--border); overflow:hidden; }
+    .modal-header { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; padding:18px 22px; background:var(--accent); color:#fff; }
+    .modal-header h2 { margin:0; font-size:1.3rem; }
+    .modal-close { width:auto; border:1px solid rgba(255,255,255,.55); background:rgba(255,255,255,.16); color:#fff; border-radius:999px; padding:8px 13px; }
+    .modal-content { padding:22px; max-height:72vh; overflow-y:auto; line-height:1.5; }
+    .modal-content h3 { margin:20px 0 8px; color:var(--accent); font-size:1.05rem; }
+    @media (max-width: 720px) {
+      body { padding:16px; align-items:flex-start; }
+      .grid { grid-template-columns:1fr; }
+      .acceptance-controls { flex-direction:column; align-items:stretch; }
+      .actions { align-items:stretch; }
+      button { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="header"><h1>Jac's Sharpening</h1><p>Customer details and terms acceptance form.</p></header>
+    <section class="card" aria-labelledby="form-title">
+      <div class="card-banner"><h2 id="form-title">Customer Information &amp; T&amp;Cs Acceptance</h2><p>Customer name, mobile, email and T&amp;Cs acceptance are mandatory.</p></div>
+      <form id="customerForm" novalidate>
+        <div class="grid">
+          <div class="field full-width"><label for="customerName">Customer name<span class="required">*</span></label><input type="text" id="customerName" name="customerName" autocomplete="name" required placeholder="e.g. Jane Smith" /></div>
+          <div class="field"><label for="mobile">Mobile<span class="required">*</span></label><input type="tel" id="mobile" name="mobile" autocomplete="tel" required inputmode="numeric" placeholder="e.g. 0412 345 678" /><span class="hint">Displayed as XXXX XXX XXX.</span></div>
+          <div class="field"><label for="email">Email<span class="required">*</span></label><input type="email" id="email" name="email" autocomplete="email" required placeholder="e.g. jane@example.com" /></div>
+          <div class="field full-width"><label for="streetAddress">Street address</label><input type="text" id="streetAddress" name="streetAddress" autocomplete="address-line1" placeholder="e.g. 12 Example Street" /></div>
+          <div class="field"><label for="suburb">Suburb</label><input type="text" id="suburb" name="suburb" autocomplete="address-level2" placeholder="e.g. Buderim" /></div>
+          <div class="field"><label for="postcode">Postcode</label><input type="text" id="postcode" name="postcode" autocomplete="postal-code" inputmode="numeric" maxlength="4" placeholder="e.g. 4556" /></div>
+        </div>
+        <div class="terms-box">
+          <div class="field"><label>Terms and conditions</label><div class="terms-text-box" id="termsSummary"><p><strong>Important:</strong> Sharpening removes metal and may change an item's finish and edge profile. Results depend on the item's condition and prior history. We are not responsible for hidden defects or pre-existing damage. Nothing in these terms excludes your rights under Australian Consumer Law. <a href="#fullTermsModal" class="terms-link" id="openTermsLink">Full Terms &amp; Conditions</a> available here.</p></div></div>
+          <div class="acceptance-row">
+            <div class="checkbox-row"><input type="checkbox" id="termsAccepted" name="termsAccepted" required /><label for="termsAccepted">I confirm I have read and accept the terms and conditions.<span class="required">*</span></label></div>
+            <div class="acceptance-confirm-box"><label for="acceptanceName">Customer acceptance</label><div class="acceptance-controls"><input type="text" id="acceptanceName" name="acceptanceName" readonly placeholder="Customer name will appear here" /><button type="button" class="accept-btn" id="acceptTermsButton">Accept and prepare emails</button></div></div>
+          </div>
+        </div>
+        <div class="actions"><button type="reset" class="reset-btn">Clear form</button></div>
+        <div class="email-links" id="emailLinksPanel"><h3>Email copies</h3><p class="email-note">JSON has been prepared. Run the local Outlook draft script next to create both drafts from ImJacksBack@gmail.com with attachment.</p><div class="email-actions"><a href="#" class="email-button" id="clientEmailLink">Open customer draft (fallback)</a><a href="#" class="email-button" id="businessEmailLink">Open Jac's draft + JSON (fallback)</a><button type="button" class="copy-button" id="copyClientButton">Copy customer copy</button><button type="button" class="copy-button" id="copyBusinessButton">Copy Jac's copy + JSON</button><button type="button" class="copy-button" id="downloadJsonButton">Download JSON attachment</button></div><p class="email-note">Fallback buttons use mailto and may use Outlook default sender. Scripted Outlook drafting is the reliable path.</p></div>
+        <div id="formMessage" class="message" role="status" aria-live="polite"></div>
+        <div id="backendStatus" class="backend-status" aria-live="polite">Checking mail backend...</div>
+        <pre id="formOutput" class="output" aria-label="Submitted customer details"></pre>
+      </form>
+    </section>
+    <div class="modal-backdrop" id="fullTermsModal" aria-hidden="true">
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="fullTermsTitle">
+        <div class="modal-header"><h2 id="fullTermsTitle">Jac's Sharpening<br />Customer Terms &amp; Conditions</h2><button type="button" class="modal-close" id="closeTermsButton">Close</button></div>
+        <div class="modal-content"><p>By leaving an item with Jac's Sharpening, requesting a quote, approving work, or paying an invoice, you agree to the following terms.</p></div>
+      </div>
+    </div>
+  </main>
+  <script>
+    const EMAIL_TO = "IMJacksBack@gmail.com";
+    const BACKEND_SEND_URL = "http://localhost:8787/send-emails";
+    const TERMS_VERSION = "Jac's Sharpening Customer Terms & Conditions";
+    const form = document.getElementById("customerForm");
+    const message = document.getElementById("formMessage");
+    const output = document.getElementById("formOutput");
+    const openTermsLink = document.getElementById("openTermsLink");
+    const closeTermsButton = document.getElementById("closeTermsButton");
+    const fullTermsModal = document.getElementById("fullTermsModal");
+    const acceptanceName = document.getElementById("acceptanceName");
+    const acceptTermsButton = document.getElementById("acceptTermsButton");
+    const emailLinksPanel = document.getElementById("emailLinksPanel");
+    const clientEmailLink = document.getElementById("clientEmailLink");
+    const businessEmailLink = document.getElementById("businessEmailLink");
+    const copyClientButton = document.getElementById("copyClientButton");
+    const copyBusinessButton = document.getElementById("copyBusinessButton");
+    const downloadJsonButton = document.getElementById("downloadJsonButton");
+    const backendStatus = document.getElementById("backendStatus");
+    const termsAccepted = document.getElementById("termsAccepted");
+    let latestClientEmailText = "";
+    let latestBusinessEmailText = "";
+    let latestJsonText = "";
+    let lastFocusedElement = null;
+    const FOCUSABLE_SELECTOR = "a[href], button:not([disabled]), textarea, input:not([disabled]), select, [tabindex]:not([tabindex='-1'])";
+
+    function setMessage(type, text) { message.className = "message " + type; message.textContent = text; }
+    function normaliseSpaces(value) { return value.trim().replace(/\s{2,}/g, " "); }
+    function digitsOnly(value) { return (value || "").replace(/\D/g, ""); }
+    function formatMobileDisplay(value) {
+      const d = digitsOnly(value).slice(0, 10);
+      const p1 = d.slice(0, 4);
+      const p2 = d.slice(4, 7);
+      const p3 = d.slice(7, 10);
+      return [p1, p2, p3].filter(Boolean).join(" ");
+    }
+    function syncAcceptanceName() { acceptanceName.value = normaliseSpaces(form.customerName.value); }
+    function clearMessage() {
+      message.className = "message"; message.textContent = ""; output.className = "output"; output.textContent = "";
+      emailLinksPanel.className = "email-links"; clientEmailLink.setAttribute("href", "#"); businessEmailLink.setAttribute("href", "#");
+      latestClientEmailText = ""; latestBusinessEmailText = ""; latestJsonText = "";
+    }
+    function getFormData() {
+      syncAcceptanceName();
+      form.mobile.value = formatMobileDisplay(form.mobile.value);
+      const data = {
+        customerName: normaliseSpaces(form.customerName.value),
+        mobile: form.mobile.value,
+        email: form.email.value.trim(),
+        streetAddress: normaliseSpaces(form.streetAddress.value),
+        suburb: normaliseSpaces(form.suburb.value),
+        postcode: form.postcode.value.trim(),
+        termsAccepted: termsAccepted.checked,
+        acceptedBy: acceptanceName.value,
+        termsVersion: TERMS_VERSION,
+        acceptedAt: new Date().toISOString()
+      };
+      form.customerName.value = data.customerName;
+      form.mobile.value = data.mobile;
+      form.email.value = data.email;
+      form.streetAddress.value = data.streetAddress;
+      form.suburb.value = data.suburb;
+      form.postcode.value = data.postcode;
+      acceptanceName.value = data.acceptedBy;
+      return data;
+    }
+    function buildCompletedFormText(data) { return "Jac's Sharpening - Completed Customer Acceptance Form\n\nCustomer name: " + data.customerName + "\nMobile: " + data.mobile + "\nEmail: " + data.email + "\nStreet address: " + (data.streetAddress || "Not supplied") + "\nSuburb: " + (data.suburb || "Not supplied") + "\nPostcode: " + (data.postcode || "Not supplied") + "\n\nTerms accepted: " + (data.termsAccepted ? "Yes" : "No") + "\nAccepted by: " + data.acceptedBy + "\nAccepted at: " + data.acceptedAt + "\nTerms version: " + data.termsVersion; }
+    function buildClientEmailText(data) { return "Hello " + data.customerName + ",\n\nThank you. Please find below a copy of your completed Jac's Sharpening customer acceptance form.\n\n" + buildCompletedFormText(data) + "\n\nRegards,\nJac's Sharpening"; }
+    function buildClientMailtoUrl(data, body) { return "mailto:" + encodeURIComponent(data.email) + "?subject=" + encodeURIComponent("Jac's Sharpening completed customer form - " + data.customerName) + "&body=" + encodeURIComponent(body); }
+    function buildBusinessEmailText(data) { return "Completed form:\n\n" + buildCompletedFormText(data) + "\n\nJSON:\n\n" + JSON.stringify(data, null, 2); }
+    function buildBusinessMailtoUrl(data, body) { return "mailto:" + encodeURIComponent(EMAIL_TO) + "?subject=" + encodeURIComponent("Jac's Sharpening customer form and JSON - " + data.customerName) + "&body=" + encodeURIComponent(body); }
+    function setBackendStatus(isUp) {
+      backendStatus.className = isUp ? "backend-status ok" : "backend-status down";
+      backendStatus.textContent = isUp ? "Mail backend connected: auto-send ready" : "Mail backend offline: auto-send unavailable";
+    }
+    async function checkBackendHealth() {
+      try {
+        const res = await fetch("http://localhost:8787/health");
+        setBackendStatus(res.ok);
+        return res.ok;
+      } catch (e) {
+        setBackendStatus(false);
+        return false;
+      }
+    }
+    async function sendViaBackend(data) {
+      const res = await fetch(BACKEND_SEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload.ok) throw new Error(payload.error || "Failed to send emails");
+      setBackendStatus(true);
+      return payload;
+    }
+
+    function validateAndPrepare() {
+      const data = getFormData();
+      if (!form.checkValidity()) { form.reportValidity(); setMessage("error", "Please complete customer name, mobile, email and accept the terms and conditions."); return null; }
+      if (!data.termsAccepted) { termsAccepted.focus(); setMessage("error", "Please tick terms and conditions before proceeding."); return null; }
+      if (!data.acceptedBy) { form.customerName.focus(); setMessage("error", "Please enter the customer name before accepting the terms and conditions."); return null; }
+      return data;
+    }
+
+    function openTermsModal(event) {
+      event.preventDefault();
+      lastFocusedElement = document.activeElement;
+      fullTermsModal.classList.add("visible");
+      fullTermsModal.setAttribute("aria-hidden", "false");
+      closeTermsButton.focus();
+    }
+    function closeTermsModal() {
+      fullTermsModal.classList.remove("visible");
+      fullTermsModal.setAttribute("aria-hidden", "true");
+      if (lastFocusedElement && typeof lastFocusedElement.focus === "function") lastFocusedElement.focus(); else openTermsLink.focus();
+    }
+    function trapModalFocus(event) {
+      if (event.key !== "Tab" || !fullTermsModal.classList.contains("visible")) return;
+      const focusables = fullTermsModal.querySelectorAll(FOCUSABLE_SELECTOR);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+
+    openTermsLink.addEventListener("click", openTermsModal);
+    closeTermsButton.addEventListener("click", closeTermsModal);
+    fullTermsModal.addEventListener("click", function (event) { if (event.target === fullTermsModal) closeTermsModal(); });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && fullTermsModal.classList.contains("visible")) closeTermsModal();
+      trapModalFocus(event);
+    });
+    form.customerName.addEventListener("input", syncAcceptanceName);
+    form.mobile.addEventListener("input", function () {
+      form.mobile.value = formatMobileDisplay(form.mobile.value);
+    });
+    acceptTermsButton.addEventListener("click", function () {
+      const data = validateAndPrepare();
+      if (!data) return;
+      latestJsonText = JSON.stringify(data, null, 2);
+      latestClientEmailText = buildClientEmailText(data);
+      latestBusinessEmailText = buildBusinessEmailText(data);
+      output.className = "output visible";
+      output.textContent = latestJsonText;
+      const clientUrl = buildClientMailtoUrl(data, latestClientEmailText);
+      const businessUrl = buildBusinessMailtoUrl(data, latestBusinessEmailText);
+      clientEmailLink.setAttribute("href", clientUrl);
+      businessEmailLink.setAttribute("href", businessUrl);
+      emailLinksPanel.className = "email-links visible";
+      setMessage("success", "Accepted. Sending both emails now...");
+      sendViaBackend(data).then(function () {
+        setMessage("success", "Success. Customer and Jac emails were sent automatically from ImJacksBack@gmail.com. JSON was attached to Jac's email.");
+      }).catch(function (err) {
+        setBackendStatus(false);
+        setMessage("error", "Accepted, but automatic send failed: " + err.message + ". Start backend using start_jacs_mail_backend.cmd, or use fallback buttons below.");
+      });
+    });
+    copyClientButton.addEventListener("click", function () {
+      if (!latestClientEmailText) { setMessage("error", "Please press Accept first so the customer copy can be prepared."); return; }
+      navigator.clipboard.writeText(latestClientEmailText).then(function () { setMessage("success", "Customer copy text copied. Paste it into a new email to the customer if needed."); }).catch(function () { setMessage("error", "Copy did not work in this browser. Select and copy the generated text manually."); });
+    });
+    copyBusinessButton.addEventListener("click", function () {
+      if (!latestBusinessEmailText) { setMessage("error", "Please press Accept first so Jac's copy and JSON can be prepared."); return; }
+      navigator.clipboard.writeText(latestBusinessEmailText).then(function () { setMessage("success", "Jac's copy and JSON copied. Paste it into a new email to IMJacksBack@gmail.com if needed."); }).catch(function () { setMessage("error", "Copy did not work in this browser. Select and copy the generated text manually."); });
+    });
+    downloadJsonButton.addEventListener("click", function () {
+      if (!latestJsonText) { setMessage("error", "Please press Accept first so the JSON attachment can be prepared."); return; }
+      const blob = new Blob([latestJsonText], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "jacs-customer-form.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setMessage("success", "JSON downloaded. Attach jacs-customer-form.json to Jac's email.");
+    });
+    form.addEventListener("submit", function (event) { event.preventDefault(); });
+    form.addEventListener("reset", function () { setTimeout(clearMessage, 0); });
+    checkBackendHealth();
+    setInterval(checkBackendHealth, 15000);
+  </script>
+</body>
+</html>
