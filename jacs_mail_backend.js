@@ -45,6 +45,7 @@ function ensureFields(data) {
 }
 
 function buildCompletedFormText(data) {
+  const itemsSection = formatActivatedItemsText(data);
   return `Jac's Sharpening - Completed Customer Acceptance Form
 
 Customer details
@@ -55,11 +56,37 @@ Street address: ${normaliseSpaces(data.streetAddress) || "Not supplied"}
 Suburb: ${normaliseSpaces(data.suburb) || "Not supplied"}
 Postcode: ${normaliseSpaces(data.postcode) || "Not supplied"}
 
+Items to be sharpened (activated only)
+${itemsSection}
+
 Terms acceptance
 Terms accepted: Yes
 Accepted by: ${normaliseSpaces(data.acceptedBy)}
 Accepted at: ${normaliseSpaces(data.acceptedAt)}
 Terms version: ${normaliseSpaces(data.termsVersion)}`;
+}
+
+function getActivatedItems(data) {
+  const source = Array.isArray(data.sharpeningItemsActivated)
+    ? data.sharpeningItemsActivated
+    : Array.isArray(data.sharpeningItems)
+      ? data.sharpeningItems.filter((item) => item && item.selected)
+      : [];
+  return source;
+}
+
+function formatActivatedItemsText(data) {
+  const items = getActivatedItems(data);
+  const furtherDetails = normaliseSpaces(data.itemsFurtherDetails);
+  if (!items.length && !furtherDetails) return "No items specified.";
+  const lines = items.map((item) => {
+    const services = [];
+    if (item.sharpenOnly) services.push("Sharpen");
+    if (item.fullService) services.push("Service");
+    return `- ${normaliseSpaces(item.label || item.key || "Item")} | Qty: ${normaliseSpaces(item.quantity) || "Not entered"} | Service: ${services.length ? services.join(", ") : "Not selected"}`;
+  });
+  if (furtherDetails) lines.push(`\nFurther details: ${furtherDetails}`);
+  return lines.join("\n");
 }
 
 function escHtml(v) {
@@ -80,6 +107,7 @@ function buildCompletedFormHtml(data) {
   const acceptedBy = escHtml(normaliseSpaces(data.acceptedBy));
   const acceptedAt = escHtml(normaliseSpaces(data.acceptedAt));
   const termsVersion = escHtml(normaliseSpaces(data.termsVersion));
+  const itemsHtml = escHtml(formatActivatedItemsText(data)).replace(/\n/g, "<br/>");
 
   return `
 <div style="font-family:Aptos,Calibri,Arial,sans-serif;font-size:12pt;color:#1f1f1f;line-height:1.5;">
@@ -94,6 +122,9 @@ function buildCompletedFormHtml(data) {
     <tr><td style="border:1px solid #222;padding:6px 10px;">Postcode:</td><td style="border:1px solid #222;padding:6px 10px;">${postcode}</td></tr>
   </table>
   <h3 style="margin:16px 0 8px;">Terms acceptance</h3>
+  <h3 style="margin:16px 0 8px;">Items to be sharpened (activated only)</h3>
+  <div style="border:1px solid #222;padding:10px;min-width:620px;white-space:normal;">${itemsHtml}</div>
+  <h3 style="margin:16px 0 8px;">Terms acceptance</h3>
   <table style="border-collapse:collapse;min-width:620px;">
     <tr><td style="border:1px solid #222;padding:6px 10px;min-width:220px;">Terms accepted:</td><td style="border:1px solid #222;padding:6px 10px;">Yes</td></tr>
     <tr><td style="border:1px solid #222;padding:6px 10px;">Accepted by:</td><td style="border:1px solid #222;padding:6px 10px;">${acceptedBy}</td></tr>
@@ -107,6 +138,7 @@ function buildCustomerBody(data) {
   return `Hello ${normaliseSpaces(data.customerName)},
 
 Thank you. Please find below a copy of your completed Jac's Sharpening customer acceptance form.
+The full Terms & Conditions PDF is attached.
 
 ${buildCompletedFormText(data)}
 
@@ -203,6 +235,53 @@ function buildMimeWithJsonAttachment({ to, from, subject, textBody, htmlBody, js
   ].join("\r\n");
 }
 
+function buildMimeWithPdfAttachment({ to, from, subject, textBody, htmlBody, pdfBytes, pdfFileName }) {
+  const boundary = "----=_Part_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+  const altBoundary = "----=_Alt_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+  return [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    "MIME-Version: 1.0",
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    "",
+    `--${boundary}`,
+    `Content-Type: multipart/alternative; boundary="${altBoundary}"`,
+    "",
+    `--${altBoundary}`,
+    "Content-Type: text/plain; charset=UTF-8",
+    "",
+    textBody,
+    "",
+    `--${altBoundary}`,
+    "Content-Type: text/html; charset=UTF-8",
+    "",
+    htmlBody,
+    "",
+    `--${altBoundary}--`,
+    "",
+    `--${boundary}`,
+    `Content-Type: application/pdf; name="${pdfFileName}"`,
+    "Content-Transfer-Encoding: base64",
+    `Content-Disposition: attachment; filename="${pdfFileName}"`,
+    "",
+    Buffer.from(pdfBytes).toString("base64"),
+    "",
+    `--${boundary}--`,
+    ""
+  ].join("\r\n");
+}
+
+async function fetchPdfAttachment(url) {
+  if (!normaliseSpaces(url)) return null;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Could not load client terms PDF: ${res.status}`);
+  }
+  const arr = await res.arrayBuffer();
+  return Buffer.from(arr);
+}
+
 async function getAccessToken() {
   const clientId = process.env.GMAIL_CLIENT_ID;
   const clientSecret = process.env.GMAIL_CLIENT_SECRET;
@@ -252,10 +331,22 @@ async function sendBothEmails(data) {
   const customerHtml = `<div style="font-family:Aptos,Calibri,Arial,sans-serif;font-size:12pt;color:#1f1f1f;line-height:1.5;">
 <p>Hello ${escHtml(normaliseSpaces(data.customerName))},</p>
 <p>Thank you. Please find below a copy of your completed Jac's Sharpening customer acceptance form.</p>
+<p>The full Terms &amp; Conditions PDF is attached.</p>
 ${buildCompletedFormHtml(data)}
 <p style="margin-top:14px;">Regards,<br/>Jac's Sharpening</p>
 </div>`;
-  const customerMime = buildMimeHtml({
+  const clientTermsUrl = normaliseSpaces(data.clientTermsAttachmentUrl);
+  const clientTermsName = normaliseSpaces(data.clientTermsAttachmentName) || "terms-and-conditions-full-v1.pdf";
+  const clientTermsPdf = await fetchPdfAttachment(clientTermsUrl);
+  const customerMime = clientTermsPdf ? buildMimeWithPdfAttachment({
+    from: fromAddress,
+    to: normaliseSpaces(data.email),
+    subject: `Jac's Sharpening completed customer form - ${normaliseSpaces(data.customerName)}`,
+    textBody: buildCustomerBody(data),
+    htmlBody: customerHtml,
+    pdfBytes: clientTermsPdf,
+    pdfFileName: clientTermsName
+  }) : buildMimeHtml({
     from: fromAddress,
     to: normaliseSpaces(data.email),
     subject: `Jac's Sharpening completed customer form - ${normaliseSpaces(data.customerName)}`,
