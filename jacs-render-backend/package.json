@@ -1,0 +1,9 @@
+{
+  "name": "jacs-mail-backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "jacs_mail_backend.js",
+  "scripts": {
+    "start": "node jacs_mail_backend.js"
+  }
+}
