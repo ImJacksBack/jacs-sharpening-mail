@@ -16,7 +16,7 @@ function loadDotEnv() {
     if (idx < 1) continue;
     const key = line.slice(0, idx).trim();
     const value = line.slice(idx + 1).trim();
-    if (!process.env[key]) process.env[key] = value;
+    process.env[key] = value;
   }
 }
 
@@ -56,7 +56,7 @@ Street address: ${normaliseSpaces(data.streetAddress) || "Not supplied"}
 Suburb: ${normaliseSpaces(data.suburb) || "Not supplied"}
 Postcode: ${normaliseSpaces(data.postcode) || "Not supplied"}
 
-Items to be sharpened (activated only)
+Items to be sharpened
 ${itemsSection}
 
 Terms acceptance
@@ -81,8 +81,8 @@ function formatActivatedItemsText(data) {
   if (!items.length && !furtherDetails) return "No items specified.";
   const lines = items.map((item) => {
     const services = [];
-    if (item.sharpenOnly) services.push("Sharpen");
-    if (item.fullService) services.push("Service");
+    if (item.sharpenOnly) services.push("Sharpen Only");
+    if (item.fullService) services.push("Full Service");
     return `- ${normaliseSpaces(item.label || item.key || "Item")} | Qty: ${normaliseSpaces(item.quantity) || "Not entered"} | Service: ${services.length ? services.join(", ") : "Not selected"}`;
   });
   if (furtherDetails) lines.push(`\nFurther details: ${furtherDetails}`);
@@ -122,7 +122,7 @@ function buildCompletedFormHtml(data) {
     <tr><td style="border:1px solid #222;padding:6px 10px;">Postcode:</td><td style="border:1px solid #222;padding:6px 10px;">${postcode}</td></tr>
   </table>
   <h3 style="margin:16px 0 8px;">Terms acceptance</h3>
-  <h3 style="margin:16px 0 8px;">Items to be sharpened (activated only)</h3>
+  <h3 style="margin:16px 0 8px;">Items to be sharpened</h3>
   <div style="border:1px solid #222;padding:10px;min-width:620px;white-space:normal;">${itemsHtml}</div>
   <h3 style="margin:16px 0 8px;">Terms acceptance</h3>
   <table style="border-collapse:collapse;min-width:620px;">
@@ -282,6 +282,19 @@ async function fetchPdfAttachment(url) {
   return Buffer.from(arr);
 }
 
+function loadLocalTermsPdf() {
+  const candidates = [
+    path.join(process.cwd(), "terms-and-conditions-full-v1.pdf"),
+    path.join(process.cwd(), "Jacs_Sharpening_Terms.pdf")
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      return fs.readFileSync(p);
+    }
+  }
+  return null;
+}
+
 async function getAccessToken() {
   const clientId = process.env.GMAIL_CLIENT_ID;
   const clientSecret = process.env.GMAIL_CLIENT_SECRET;
@@ -305,6 +318,19 @@ async function getAccessToken() {
   }
   const tokenJson = await tokenRes.json();
   return tokenJson.access_token;
+}
+
+async function getMailHealth() {
+  try {
+    await getAccessToken();
+    return { ok: true, mailReady: true };
+  } catch (error) {
+    return {
+      ok: true,
+      mailReady: false,
+      mailError: String(error && error.message ? error.message : error)
+    };
+  }
 }
 
 async function gmailSendRaw(accessToken, raw) {
@@ -337,7 +363,17 @@ ${buildCompletedFormHtml(data)}
 </div>`;
   const clientTermsUrl = normaliseSpaces(data.clientTermsAttachmentUrl);
   const clientTermsName = normaliseSpaces(data.clientTermsAttachmentName) || "terms-and-conditions-full-v1.pdf";
-  const clientTermsPdf = await fetchPdfAttachment(clientTermsUrl);
+  let clientTermsPdf = null;
+  if (clientTermsUrl) {
+    try {
+      clientTermsPdf = await fetchPdfAttachment(clientTermsUrl);
+    } catch (e) {
+      clientTermsPdf = null;
+    }
+  }
+  if (!clientTermsPdf) {
+    clientTermsPdf = loadLocalTermsPdf();
+  }
   const customerMime = clientTermsPdf ? buildMimeWithPdfAttachment({
     from: fromAddress,
     to: normaliseSpaces(data.email),
@@ -380,7 +416,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "OPTIONS") return json(res, 204, {});
 
     if (req.method === "GET" && reqUrl.pathname === "/health") {
-      return json(res, 200, { ok: true });
+      const health = await getMailHealth();
+      return json(res, 200, health);
     }
 
     if (req.method === "POST" && reqUrl.pathname === "/send-emails") {
@@ -400,3 +437,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`Jac's mail backend running on http://localhost:${PORT}`);
 });
+
+
